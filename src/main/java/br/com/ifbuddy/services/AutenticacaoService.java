@@ -1,9 +1,6 @@
 package br.com.ifbuddy.services;
 
-import java.util.List;
-
 import org.eclipse.microprofile.jwt.Claims;
-import org.jboss.logmanager.Logger;
 import org.jose4j.jwt.JwtClaims;
 
 import br.com.ifbuddy.exception.BusinessException;
@@ -33,10 +30,6 @@ public class AutenticacaoService {
 
   @Context
   HttpHeaders headers;
-
-  public List<Estudante> listarUsuarios() {
-    return estudanteRepository.listAll();
-  }
 
   @Transactional
   public Estudante cadastro(CadastroDTO cadastroDTO) {
