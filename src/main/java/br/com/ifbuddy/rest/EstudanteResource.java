@@ -1,10 +1,12 @@
 package br.com.ifbuddy.rest;
 
 import br.com.ifbuddy.rest.dto.FiltrosDTO;
+import br.com.ifbuddy.rest.dto.PerfilEstudanteDTO;
 import br.com.ifbuddy.services.EstudanteService;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
+import jakarta.ws.rs.PATCH;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
@@ -30,6 +32,13 @@ public class EstudanteResource {
   @Produces(MediaType.APPLICATION_JSON)
   public Response buscarEstudantePorId(@PathParam("id") Long id) {
     var resposta = estudanteService.buscarEstudantePorId(id);
+    return Response.ok(resposta).build();
+  }
+
+  @PATCH
+  @Produces(MediaType.APPLICATION_JSON)
+  public Response atualizarPerfilEstudante(PerfilEstudanteDTO perfilEstudanteDTO) {
+    var resposta = estudanteService.atualizarPerfilEstudante(perfilEstudanteDTO);
     return Response.ok(resposta).build();
   }
 }
