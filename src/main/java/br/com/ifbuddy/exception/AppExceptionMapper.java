@@ -1,5 +1,6 @@
 package br.com.ifbuddy.exception;
 
+import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Request;
@@ -27,6 +28,24 @@ public class AppExceptionMapper implements ExceptionMapper<Exception> {
       body.put("status", Response.Status.BAD_REQUEST.getStatusCode());
       body.put("message", e.getMessage());
       return Response.status(Response.Status.BAD_REQUEST)
+          .type(MediaType.APPLICATION_JSON)
+          .entity(body)
+          .build();
+    }
+
+    if (e instanceof NotFoundException) {
+      body.put("status", Response.Status.NOT_FOUND.getStatusCode());
+      body.put("message", e.getMessage());
+      return Response.status(Response.Status.NOT_FOUND)
+          .type(MediaType.APPLICATION_JSON)
+          .entity(body)
+          .build();
+    }
+
+    if (e instanceof IllegalStateException || e instanceof IllegalArgumentException) {
+      body.put("status", Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
+      body.put("message", e.getMessage());
+      return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
           .type(MediaType.APPLICATION_JSON)
           .entity(body)
           .build();
