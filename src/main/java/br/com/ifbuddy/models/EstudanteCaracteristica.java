@@ -6,26 +6,34 @@ import br.com.ifbuddy.enums.TipoCaracteristica;
 import br.com.ifbuddy.enums.converters.TipoCaracteristicaConverter;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
+import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
-@Data
+@Getter
+@Setter
+@ToString(exclude = { "estudante" })
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Table(name = "ESTUDANTE_CARACTERISTICA")
 @Entity
 public class EstudanteCaracteristica {
-  @Id
+  @EmbeddedId
+  @EqualsAndHashCode.Include
+  private EstudanteCaracteristicaId id;
+
   @ManyToOne
-  @JoinColumn(name = "ESTUDANTE_ID")
+  @JoinColumn(name = "ESTUDANTE_ID", insertable = false, updatable = false)
   @JsonIgnore
   private Estudante estudante;
 
-  @Id
   @ManyToOne
-  @JoinColumn(name = "CARACTERISTICA_ID")
+  @JoinColumn(name = "CARACTERISTICA_ID", insertable = false, updatable = false)
   private CaracteristicaPessoal caracteristicaPessoal;
 
   @Convert(converter = TipoCaracteristicaConverter.class)
