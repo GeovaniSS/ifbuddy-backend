@@ -2,8 +2,8 @@ package br.com.ifbuddy.models;
 
 import java.sql.Blob;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import br.com.ifbuddy.enums.Genero;
 import br.com.ifbuddy.enums.TipoTCC;
@@ -27,14 +27,12 @@ import jakarta.persistence.NamedNativeQuery;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 @Data
 @Table(name = "ESTUDANTE")
 @Entity
-@NamedNativeQuery(
-  name = "Estudante.buscarPorFiltros", 
-  query = 
-    """
+@NamedNativeQuery(name = "Estudante.buscarPorFiltros", query = """
       SELECT DISTINCT e.*
       FROM ESTUDANTE e
       JOIN ESTUDANTE_TEMA et ON e.ESTUDANTE_ID = et.ESTUDANTE_ID
@@ -46,9 +44,8 @@ import lombok.Data;
         AND (:ignorarFiltroTemas = TRUE OR et.TEMA_ID IN (:temasIds))
         AND (:ignorarFiltroCaracteristicas = TRUE OR ec.CARACTERISTICA_ID IN (:pontosFortesIds))
         AND (:ignorarTipoCaracteristica = TRUE OR ec.TIPO_CARACTERISTICA = :tipoCaracteristica)
-    """,
-    resultClass = Estudante.class
-)
+    """, resultClass = Estudante.class)
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Estudante {
   @Id()
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -118,9 +115,21 @@ public class Estudante {
   private CursoSuperior curso;
 
   @ManyToMany(fetch = FetchType.LAZY)
-  @JoinTable(name = "ESTUDANTE_TEMA", joinColumns = @JoinColumn(name = "ESTUDANTE_ID"), inverseJoinColumns = @JoinColumn(name = "TEMA_ID"))
-  private List<Tema> temas;
+  @JoinTable(
+    name = "ESTUDANTE_TEMA",
+    joinColumns = @JoinColumn(name = "ESTUDANTE_ID"), 
+    inverseJoinColumns = @JoinColumn(name = "TEMA_ID")
+  )
+  private Set<Tema> temas = new HashSet<>();
 
   @OneToMany(mappedBy = "estudante", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-  private List<EstudanteCaracteristica> caracteristicas = new ArrayList<>();
+  private Set<EstudanteCaracteristica> caracteristicas = new HashSet<>();;
+
+  @ManyToMany(fetch = FetchType.LAZY)
+  @JoinTable(
+    name = "ESTUDANTE_DISPONIBILIDADE", 
+    joinColumns = @JoinColumn(name = "ESTUDANTE_ID"), 
+    inverseJoinColumns = @JoinColumn(name = "DISPONIBILIDADE_ID")
+  )
+  private Set<Disponibilidade> disponibilidades = new HashSet<>();
 }
