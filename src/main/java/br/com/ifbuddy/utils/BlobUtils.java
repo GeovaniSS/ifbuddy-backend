@@ -17,4 +17,16 @@ public class BlobUtils {
       throw new RuntimeException("Erro ao converter String para Blob", e);
     }
   }
+
+  public static String blobParaString(Blob blob) {
+    if (blob == null) {
+      return null;
+    }
+    try {
+      byte[] bytes = blob.getBytes(1, (int) blob.length());
+      return new String(bytes, StandardCharsets.UTF_8);
+    } catch (Exception e) {
+      throw new RuntimeException("Erro ao converter Blob para String", e);
+    }
+  }
 }
