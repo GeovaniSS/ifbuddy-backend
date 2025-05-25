@@ -9,6 +9,7 @@ import br.com.ifbuddy.enums.Genero;
 import br.com.ifbuddy.enums.TipoCaracteristica;
 import br.com.ifbuddy.enums.TipoTCC;
 import br.com.ifbuddy.enums.Turno;
+import br.com.ifbuddy.enums.TurnoDia;
 import br.com.ifbuddy.exception.BusinessException;
 import br.com.ifbuddy.models.CaracteristicaPessoal;
 import br.com.ifbuddy.models.CursoSuperior;
@@ -22,6 +23,9 @@ import br.com.ifbuddy.repository.CaracteristicaRepository;
 import br.com.ifbuddy.repository.CursoRepository;
 import br.com.ifbuddy.repository.EstudanteRepository;
 import br.com.ifbuddy.repository.TemaRepository;
+import br.com.ifbuddy.rest.dto.DisponibilidadeDTO;
+import br.com.ifbuddy.rest.dto.EstudanteDTO;
+import br.com.ifbuddy.rest.dto.EstudanteListaDTO;
 import br.com.ifbuddy.rest.dto.FiltrosDTO;
 import br.com.ifbuddy.rest.dto.PerfilEstudanteDTO;
 import br.com.ifbuddy.utils.BlobUtils;
@@ -54,7 +58,7 @@ public class EstudanteService {
   @Inject
   EntityManager entityManager;
 
-  public List<Estudante> listarEstudantes(FiltrosDTO filtrosDTO) {
+  public List<EstudanteListaDTO> listarEstudantes(FiltrosDTO filtrosDTO) {
     boolean ignorarFiltroTemas = filtrosDTO.getTemasIds().isEmpty();
     boolean ignorarFiltroCaracteristicas = filtrosDTO.getPontosFortesIds().isEmpty();
 
@@ -73,12 +77,71 @@ public class EstudanteService {
     query.setParameter("tipoCaracteristica", TipoCaracteristica.FORTE.getKey());
     query.setParameter("ignorarTipoCaracteristica", ignorarFiltroCaracteristicas);
 
-    return query.getResultList();
+    List<Estudante> estudantes = query.getResultList();
+
+    List<EstudanteListaDTO> estudantesDTO = estudantes.stream()
+        .map(estudante -> {
+          EstudanteListaDTO dto = new EstudanteListaDTO();
+          dto.setEstudanteId(estudante.getEstudanteId());
+          dto.setNome(estudante.getNome());
+          dto.setFoto(BlobUtils.blobParaString(estudante.getFoto()));
+          dto.setNomeCurso(estudante.getCurso().getNome());
+          dto.setTurno(estudante.getTurno().getDescricao());
+          dto.setSemestreAtual(estudante.getSemestreAtual());
+          dto.setTemas(estudante.getTemas().stream()
+              .map(t -> t.getNomeTema())
+              .collect(Collectors.toList()));
+          return dto;
+        })
+        .collect(Collectors.toList());
+
+    return estudantesDTO;
   }
 
-  public Estudante buscarEstudantePorId(Long id) {
-    return estudanteRepository.findByIdOptional(id)
+  public EstudanteDTO buscarEstudantePorId(Long id) {
+    Estudante estudante = estudanteRepository.findByIdOptional(id)
         .orElseThrow(() -> new BusinessException("Estudante não encontrado para o ID: " + id));
+
+    EstudanteDTO estudanteDTO = new EstudanteDTO();
+    List<String> temas = estudante.getTemas().stream()
+        .map(Tema::getNomeTema)
+        .collect(Collectors.toList());
+    List<String> pontosFortes = estudante.getCaracteristicas().stream()
+        .filter(ec -> ec.getTipoCaracteristica() == TipoCaracteristica.FORTE)
+        .map(ec -> ec.getCaracteristicaPessoal().getDescricao())
+        .collect(Collectors.toList());
+    List<String> pontosFracos = estudante.getCaracteristicas().stream()
+        .filter(ec -> ec.getTipoCaracteristica() == TipoCaracteristica.FRACA)
+        .map(ec -> ec.getCaracteristicaPessoal().getDescricao())
+        .collect(Collectors.toList());
+    List<DisponibilidadeDTO> disponibilidades = estudante.getDisponibilidades().stream()
+        .map(d -> {
+          DisponibilidadeDTO disponibilidadeDTO = new DisponibilidadeDTO();
+          disponibilidadeDTO.setDiaSemana(d.getDiaSemana().getKey());
+          disponibilidadeDTO.setTextoDiaSemana(d.getDiaSemana().getDescricao());
+          disponibilidadeDTO.setTipoEncontro(d.getTipoEncontro().getDescricao());
+          disponibilidadeDTO.setTurnos(getTurnosTexto(d.getTurnos()));
+          return disponibilidadeDTO;
+        }).collect(Collectors.toList());
+
+    estudanteDTO.setEstudanteId(estudante.getEstudanteId());
+    estudanteDTO.setNome(estudante.getNome());
+    estudanteDTO.setFoto(BlobUtils.blobParaString(estudante.getFoto()));
+    estudanteDTO.setNomeCurso(estudante.getCurso().getNome());
+    estudanteDTO.setTurno(estudante.getTurno().getDescricao());
+    estudanteDTO.setSemestreAtual(estudante.getSemestreAtual());
+    estudanteDTO.setDescricao(estudante.getDescricao());
+    estudanteDTO.setEndereco(estudante.getEndereco());
+    estudanteDTO.setTrabalha(estudante.getTrabalha());
+    estudanteDTO.setOcupacao(estudante.getOcupacao());
+    estudanteDTO.setTipoTCC(estudante.getTipoTCC());
+    estudanteDTO.setObjetivoTCC(estudante.getObjetivoTCC());
+    estudanteDTO.setTemas(temas);
+    estudanteDTO.setPontosFortes(pontosFortes);
+    estudanteDTO.setPontosFracos(pontosFracos);
+    estudanteDTO.setDisponibilidades(disponibilidades);
+
+    return estudanteDTO;
   }
 
   @Transactional
@@ -95,6 +158,15 @@ public class EstudanteService {
     atualizarDisponibilidade(estudante, dto);
 
     return estudante;
+  }
+
+  private String getTurnosTexto(String turnos) {
+    if (turnos == null || turnos.isBlank())
+      return "";
+
+    return turnos.chars()
+        .mapToObj(t -> TurnoDia.fromKey(String.valueOf((char) t)).getDescricao())
+        .collect(Collectors.joining(", "));
   }
 
   private void atualizarDadosPessoais(Estudante estudante, PerfilEstudanteDTO dto) {
