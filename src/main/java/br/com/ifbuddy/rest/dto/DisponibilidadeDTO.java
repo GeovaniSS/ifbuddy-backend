@@ -5,6 +5,7 @@ import lombok.Data;
 @Data
 public class DisponibilidadeDTO {
   private Integer diaSemana;
+  private String textoDiaSemana;
   private String tipoEncontro;
   private String turnos;
 }
