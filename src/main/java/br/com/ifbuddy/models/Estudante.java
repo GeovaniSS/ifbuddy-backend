@@ -25,6 +25,7 @@ import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.NamedNativeQuery;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -131,5 +132,6 @@ public class Estudante {
     joinColumns = @JoinColumn(name = "ESTUDANTE_ID"), 
     inverseJoinColumns = @JoinColumn(name = "DISPONIBILIDADE_ID")
   )
+  @OrderBy("diaSemana")
   private Set<Disponibilidade> disponibilidades = new HashSet<>();
 }
