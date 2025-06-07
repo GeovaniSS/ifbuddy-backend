@@ -38,13 +38,29 @@ import lombok.EqualsAndHashCode;
       FROM ESTUDANTE e
       JOIN ESTUDANTE_TEMA et ON e.ESTUDANTE_ID = et.ESTUDANTE_ID
       JOIN ESTUDANTE_CARACTERISTICA ec ON e.ESTUDANTE_ID = ec.ESTUDANTE_ID
-      WHERE (:cursoId IS NULL OR e.CURSO_ID = :cursoId)
+      WHERE e.ESTUDANTE_ID <> :estudanteId
+        AND (:cursoId IS NULL OR e.CURSO_ID = :cursoId)
         AND (:turno IS NULL OR e.TURNO = :turno)
         AND (:semestre IS NULL OR e.SEMESTRE_ATUAL = :semestre)
         AND (:tipoTcc IS NULL OR e.TIPO_TCC = :tipoTcc)
         AND (:ignorarFiltroTemas = TRUE OR et.TEMA_ID IN (:temasIds))
         AND (:ignorarFiltroCaracteristicas = TRUE OR ec.CARACTERISTICA_ID IN (:pontosFortesIds))
         AND (:ignorarTipoCaracteristica = TRUE OR ec.TIPO_CARACTERISTICA = :tipoCaracteristica)
+        AND NOT EXISTS (
+          SELECT 1
+          FROM CONEXAO c
+          WHERE c.SOLICITANTE_ID = :estudanteId AND c.SOLICITADO_ID = e.ESTUDANTE_ID
+        )
+        AND NOT EXISTS (
+          SELECT 1
+          FROM CONEXAO c
+          WHERE (
+            (c.SOLICITANTE_ID = :estudanteId AND c.SOLICITADO_ID = e.ESTUDANTE_ID)
+            OR
+            (c.SOLICITADO_ID = :estudanteId AND c.SOLICITANTE_ID = e.ESTUDANTE_ID)
+          )
+          AND c.STATUS <> 'P'
+        )
     """, resultClass = Estudante.class)
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Estudante {
@@ -104,15 +120,20 @@ public class Estudante {
   @Column(name = "DESCRICAO", nullable = true, length = 500, columnDefinition = "VARCHAR(500)")
   private String descricao;
 
+  @Column(name = "UF", nullable = true, length = 2, columnDefinition = "CHAR(2)")
+  private String uf;
+
+  @Column(name = "CIDADE", nullable = true, length = 50, columnDefinition = "VARCHAR(50)")
+  private String cidade;
+
+  @Column(name = "BAIRRO", nullable = true, length = 50, columnDefinition = "VARCHAR(50)")
+  private String bairro;
+
   @Column(name = "ATIVO", nullable = false, columnDefinition = "BOOLEAN")
   private Boolean ativo;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "ENDERECO_ID", nullable = false)
-  private Endereco endereco;
-
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "CURSO_ID", nullable = false)
+  @JoinColumn(name = "CURSO_ID", nullable = true)
   private CursoSuperior curso;
 
   @ManyToMany(fetch = FetchType.LAZY)
