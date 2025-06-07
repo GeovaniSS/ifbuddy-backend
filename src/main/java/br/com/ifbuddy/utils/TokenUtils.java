@@ -57,7 +57,7 @@ public class TokenUtils {
         JwtConsumer jwtConsumer = new JwtConsumerBuilder()
             .setRequireExpirationTime()
             .setAllowedClockSkewInSeconds(30)
-            .setExpectedIssuer(issuer)
+            .setExpectedIssuer("IFBuddy")
             .setExpectedAudience("using-jwt")
             .setVerificationKey(publicKey)
             .build();
