@@ -3,7 +3,6 @@ package br.com.ifbuddy.rest.dto;
 import java.util.List;
 
 import br.com.ifbuddy.enums.TipoTCC;
-import br.com.ifbuddy.models.Endereco;
 import lombok.Data;
 
 @Data
@@ -15,7 +14,9 @@ public class EstudanteDTO {
   private String turno;
   private Integer semestreAtual;
   private String descricao;
-  private Endereco endereco;
+  private String uf;
+  private String cidade;
+  private String bairro;
   private String ocupacao;
   private Boolean trabalha;
   private TipoTCC tipoTCC;
