@@ -6,6 +6,7 @@ import lombok.Data;
 
 @Data
 public class FiltrosDTO {
+  private Long estudanteId;
   private Long cursoId;
   private String turno;
   private Integer semestre;
