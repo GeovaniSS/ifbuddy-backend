@@ -3,9 +3,10 @@ package br.com.ifbuddy.rest.dto;
 import lombok.Data;
 
 @Data
-public class DisponibilidadeDTO {
+public class CriarDisponibilidadeDTO {
   private Integer diaSemana;
   private String textoDiaSemana;
-  private String encontros;
-  private String horarios;
+  private Boolean ativo;
+  private Horarios horarios;
+  private Encontros encontros;
 }
