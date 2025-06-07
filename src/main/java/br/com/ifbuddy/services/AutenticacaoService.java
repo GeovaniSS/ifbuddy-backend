@@ -10,6 +10,7 @@ import br.com.ifbuddy.rest.dto.CadastroDTO;
 import br.com.ifbuddy.rest.dto.LoginDTO;
 import br.com.ifbuddy.rest.dto.TokenDTO;
 import br.com.ifbuddy.rest.dto.UsuarioDTO;
+import br.com.ifbuddy.utils.BlobUtils;
 import br.com.ifbuddy.utils.JwtUtils;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
@@ -33,12 +34,12 @@ public class AutenticacaoService {
 
   @Transactional
   public Estudante cadastro(CadastroDTO cadastroDTO) {
-    if (estudanteRepository.findByEmail(cadastroDTO.getEmail()).isPresent()) {
-      throw new BusinessException("Email já existe");
-    }
-
     if (estudanteRepository.findByMatricula(cadastroDTO.getMatricula()).isPresent()) {
       throw new BusinessException("Matrícula já existe");
+    }
+
+    if (estudanteRepository.findByEmail(cadastroDTO.getEmail()).isPresent()) {
+      throw new BusinessException("Email já existe");
     }
 
     Estudante estudante = new Estudante();
@@ -48,6 +49,7 @@ public class AutenticacaoService {
     estudante.setNome(cadastroDTO.getNome());
     estudante.setEmail(cadastroDTO.getEmail());
     estudante.setSenhaHash(senhaHash);
+    estudante.setAtivo(false);
 
     estudanteRepository.persist(estudante);
 
@@ -67,7 +69,7 @@ public class AutenticacaoService {
     String token = tokenService.generateUserToken(estudante.getEmail(), estudante.getMatricula());
 
     return new TokenDTO(
-        estudante.getEmail(),
+        estudante.getEstudanteId(),
         token);
   }
 
@@ -99,8 +101,23 @@ public class AutenticacaoService {
 
     return new UsuarioDTO(
         estudante.getEstudanteId(),
-        estudante.getEmail(),
         estudante.getNome(),
-        estudante.getMatricula());
+        estudante.getEmail(),
+        estudante.getMatricula(),
+        BlobUtils.blobParaString(estudante.getFoto()),
+        estudante.getAtivo());
+  }
+
+  public UsuarioDTO consultarUsuario(Long id) {
+    Estudante estudante = estudanteRepository.findByIdOptional(id)
+        .orElseThrow(() -> new BusinessException("Usuário não encontrado para o ID: " + id));
+
+    return new UsuarioDTO(
+        estudante.getEstudanteId(),
+        estudante.getNome(),
+        estudante.getEmail(),
+        estudante.getMatricula(),
+        BlobUtils.blobParaString(estudante.getFoto()),
+        estudante.getAtivo());
   }
 }
