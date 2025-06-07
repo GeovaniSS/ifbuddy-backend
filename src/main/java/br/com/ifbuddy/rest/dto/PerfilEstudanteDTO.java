@@ -25,5 +25,5 @@ public class PerfilEstudanteDTO {
   private List<Long> temasIds;
   private List<Long> pontosFortesIds;
   private List<Long> pontosFracosIds;
-  private List<DisponibilidadeDTO> disponibilidades;
+  private List<CriarDisponibilidadeDTO> disponibilidades;
 }
