@@ -23,9 +23,9 @@ public class CursoSuperior {
   @Column(name = "CAMPUS", nullable = false, length = 100, columnDefinition = "VARCHAR(100)")
   private String campus;
 
+  @Column(name = "TURNOS", nullable = false, length = 3, columnDefinition = "VARCHAR(3)")
+  private String turnos;
+
   @Column(name = "DURACAO_SEMESTRES", nullable = false, columnDefinition = "INTEGER")
   private Integer duracaoSemestres;
-
-  // @OneToMany(mappedBy = "curso")
-  // private List<Estudante> estudantes;
 }
