@@ -1,12 +1,11 @@
 package br.com.ifbuddy.rest;
 
 import br.com.ifbuddy.rest.dto.FiltrosDTO;
-import br.com.ifbuddy.rest.dto.PerfilEstudanteDTO;
 import br.com.ifbuddy.services.EstudanteService;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
-import jakarta.ws.rs.PATCH;
+import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
@@ -20,7 +19,7 @@ public class EstudanteResource {
   @Inject
   EstudanteService estudanteService;
 
-  @GET
+  @POST
   @Produces(MediaType.APPLICATION_JSON)
   public Response listarEstudantes(FiltrosDTO filtrosDTO) {
     var resposta = estudanteService.listarEstudantes(filtrosDTO);
@@ -30,15 +29,8 @@ public class EstudanteResource {
   @Path("/{id}")
   @GET
   @Produces(MediaType.APPLICATION_JSON)
-  public Response buscarEstudantePorId(@PathParam("id") Long id) {
-    var resposta = estudanteService.buscarEstudantePorId(id);
-    return Response.ok(resposta).build();
-  }
-
-  @PATCH
-  @Produces(MediaType.APPLICATION_JSON)
-  public Response atualizarPerfilEstudante(PerfilEstudanteDTO perfilEstudanteDTO) {
-    var resposta = estudanteService.atualizarPerfilEstudante(perfilEstudanteDTO);
+  public Response consultarEstudante(@PathParam("id") Long id) {
+    var resposta = estudanteService.consultarEstudante(id);
     return Response.ok(resposta).build();
   }
 }
