@@ -6,9 +6,7 @@ import java.util.Set;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import br.com.ifbuddy.enums.DiaSemana;
-import br.com.ifbuddy.enums.TipoEncontro;
 import br.com.ifbuddy.enums.converters.DiaSemanaConverter;
-import br.com.ifbuddy.enums.converters.TipoEncontroConverter;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
@@ -32,12 +30,11 @@ public class Disponibilidade {
   @Column(name = "DIA_SEMANA", nullable = false, length = 1, columnDefinition = "CHAR(1)")
   private DiaSemana diaSemana;
 
-  @Convert(converter = TipoEncontroConverter.class)
-  @Column(name = "TIPO_ENCONTRO", nullable = false, length = 1, columnDefinition = "CHAR(1)")
-  private TipoEncontro tipoEncontro;
+  @Column(name = "ENCONTROS", nullable = false, length = 2, columnDefinition = "VARCHAR(2)")
+  private String encontros;
 
-  @Column(name = "TURNOS", nullable = false, length = 3, columnDefinition = "VARCHAR(3)")
-  private String turnos;
+  @Column(name = "HORARIOS", nullable = false, length = 3, columnDefinition = "VARCHAR(3)")
+  private String horarios;
 
   @ManyToMany(mappedBy = "disponibilidades")
   @JsonIgnore
