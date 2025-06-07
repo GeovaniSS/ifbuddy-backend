@@ -5,7 +5,6 @@ import br.com.ifbuddy.rest.dto.SolicitarConexaoDTO;
 import br.com.ifbuddy.services.ConexaoService;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.PUT;
@@ -66,7 +65,8 @@ public class ConexaoResource {
         .build();
   }
 
-  @DELETE
+  @Path("/desfazer")
+  @PUT
   public Response desfazerConexao(GerenciarConexaoDTO gerenciarConexaoDTO) {
     var resultado = conexaoService.desfazerConexao(gerenciarConexaoDTO);
     return Response.status(Response.Status.OK)
