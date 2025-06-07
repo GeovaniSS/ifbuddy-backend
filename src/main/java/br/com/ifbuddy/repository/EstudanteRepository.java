@@ -12,7 +12,6 @@ public class EstudanteRepository implements PanacheRepository<Estudante> {
     return find("""
           SELECT e FROM Estudante e
           LEFT JOIN FETCH e.curso
-          LEFT JOIN FETCH e.endereco
           LEFT JOIN FETCH e.caracteristicas
           LEFT JOIN FETCH e.temas
           LEFT JOIN FETCH e.disponibilidades
