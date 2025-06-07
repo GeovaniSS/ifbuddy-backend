@@ -104,6 +104,11 @@ public class ConexaoService {
           + solicitanteId + " e o usuário de ID " + solicitadoId);
     }
 
+    if (conexaoExistente != null && conexaoExistente.getSolicitanteId() == solicitanteId) {
+      throw new IllegalStateException("Já existe uma solicitação de conexão para o usuário de ID "
+          + solicitadoId);
+    }
+
     if (conexaoExistente != null && conexaoExistente.getStatus().equals(StatusConexao.PENDENTE)) {
       GerenciarConexaoDTO gerenciarConexaoDTO = new GerenciarConexaoDTO();
       gerenciarConexaoDTO.setConexaoId(conexaoExistente.getConexaoId());
