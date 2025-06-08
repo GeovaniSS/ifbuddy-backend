@@ -27,7 +27,7 @@ public class TokenUtils {
     }
 
     public static String generateTokenString(JwtClaims claims) throws Exception {
-        PrivateKey pk = readPrivateKey("/privateKey.pem");
+        PrivateKey pk = readPrivateKey("/etc/secrets/privateKey.pem");
         return generateTokenString(pk, "/privateKey.pem", claims);
     }
 
@@ -52,7 +52,7 @@ public class TokenUtils {
     }
 
     public static JwtClaims validateToken(String token) throws Exception {
-        PublicKey publicKey = readPublicKey("/publicKey.pem");
+        PublicKey publicKey = readPublicKey("/etc/secrets/publicKey.pem");
 
         JwtConsumer jwtConsumer = new JwtConsumerBuilder()
             .setRequireExpirationTime()
