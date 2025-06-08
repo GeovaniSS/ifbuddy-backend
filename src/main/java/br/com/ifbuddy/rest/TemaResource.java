@@ -1,6 +1,5 @@
 package br.com.ifbuddy.rest;
 
-import br.com.ifbuddy.rest.dto.FiltrosDTO;
 import br.com.ifbuddy.services.TemaService;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
@@ -18,7 +17,7 @@ public class TemaResource {
   TemaService temaService;
 
   @GET
-  public Response listarTemas(FiltrosDTO filtrosDTO) {
+  public Response listarTemas() {
     var temas = temaService.listarTemas();
     return Response.ok(temas).build();
   }
