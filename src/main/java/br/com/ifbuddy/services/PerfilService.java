@@ -24,7 +24,6 @@ import br.com.ifbuddy.repository.TemaRepository;
 import br.com.ifbuddy.rest.dto.CriarDisponibilidadeDTO;
 import br.com.ifbuddy.rest.dto.PerfilEstudanteDTO;
 import br.com.ifbuddy.rest.dto.UsuarioDTO;
-import br.com.ifbuddy.utils.BlobUtils;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
@@ -73,7 +72,7 @@ public class PerfilService {
 
     perfilEstudanteDTO.setEstudanteId(estudante.getEstudanteId());
     perfilEstudanteDTO.setTelefone(estudante.getTelefone());
-    perfilEstudanteDTO.setFoto(BlobUtils.blobParaString(estudante.getFoto()));
+    perfilEstudanteDTO.setFoto(estudante.getFoto());
     perfilEstudanteDTO.setGenero(estudante.getGenero() != null ? estudante.getGenero().getKey() : null);
     perfilEstudanteDTO.setDataNascimento(estudante.getDataNascimento());
     perfilEstudanteDTO.setUf(estudante.getUf());
@@ -114,15 +113,13 @@ public class PerfilService {
       estudante.getNome(),
       estudante.getEmail(),
       estudante.getMatricula(),
-      BlobUtils.blobParaString(estudante.getFoto()),
+      estudante.getFoto(),
       estudante.getAtivo()
     );
   }
 
   private void atualizarDadosPessoais(Estudante estudante, PerfilEstudanteDTO dto) {
-    if (dto.getFoto() != null && !dto.getFoto().isBlank()) {
-      estudante.setFoto(BlobUtils.stringParaBlob(dto.getFoto()));
-    }
+    estudante.setFoto(dto.getFoto());
     estudante.setTelefone(dto.getTelefone());
     estudante.setGenero(Genero.fromKey(dto.getGenero()));
     estudante.setDataNascimento(dto.getDataNascimento());

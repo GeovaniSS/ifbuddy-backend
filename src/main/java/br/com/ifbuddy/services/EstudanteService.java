@@ -17,7 +17,6 @@ import br.com.ifbuddy.rest.dto.DisponibilidadeDTO;
 import br.com.ifbuddy.rest.dto.EstudanteDTO;
 import br.com.ifbuddy.rest.dto.EstudanteListaDTO;
 import br.com.ifbuddy.rest.dto.FiltrosDTO;
-import br.com.ifbuddy.utils.BlobUtils;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
@@ -70,7 +69,7 @@ public class EstudanteService {
           EstudanteListaDTO dto = new EstudanteListaDTO();
           dto.setEstudanteId(estudante.getEstudanteId());
           dto.setNome(estudante.getNome());
-          dto.setFoto(BlobUtils.blobParaString(estudante.getFoto()));
+          dto.setFoto(estudante.getFoto());
           dto.setNomeCurso(estudante.getCurso().getNome());
           dto.setTurno(estudante.getTurno().getDescricao());
           dto.setSemestreAtual(estudante.getSemestreAtual());
@@ -112,7 +111,7 @@ public class EstudanteService {
 
     estudanteDTO.setEstudanteId(estudante.getEstudanteId());
     estudanteDTO.setNome(estudante.getNome());
-    estudanteDTO.setFoto(BlobUtils.blobParaString(estudante.getFoto()));
+    estudanteDTO.setFoto(estudante.getFoto());
     estudanteDTO.setNomeCurso(estudante.getCurso() != null ? estudante.getCurso().getNome() : null);
     estudanteDTO.setTurno(estudante.getTurno() != null ? estudante.getTurno().getDescricao() : null);
     estudanteDTO.setSemestreAtual(estudante.getSemestreAtual());

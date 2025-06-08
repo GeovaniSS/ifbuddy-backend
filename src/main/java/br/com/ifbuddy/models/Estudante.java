@@ -1,6 +1,5 @@
 package br.com.ifbuddy.models;
 
-import java.sql.Blob;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
@@ -39,10 +38,10 @@ import lombok.EqualsAndHashCode;
       JOIN ESTUDANTE_TEMA et ON e.ESTUDANTE_ID = et.ESTUDANTE_ID
       JOIN ESTUDANTE_CARACTERISTICA ec ON e.ESTUDANTE_ID = ec.ESTUDANTE_ID
       WHERE e.ESTUDANTE_ID <> :estudanteId
-        AND (:cursoId IS NULL OR e.CURSO_ID = :cursoId)
-        AND (:turno IS NULL OR e.TURNO = :turno)
-        AND (:semestre IS NULL OR e.SEMESTRE_ATUAL = :semestre)
-        AND (:tipoTcc IS NULL OR e.TIPO_TCC = :tipoTcc)
+        AND (CAST(:cursoId as INTEGER) IS NULL OR e.CURSO_ID = :cursoId)
+        AND (CAST(:turno AS CHAR(1)) IS NULL OR e.TURNO = :turno)
+        AND (CAST(:semestre AS INTEGER) IS NULL OR e.SEMESTRE_ATUAL = :semestre)
+        AND (CAST(:tipoTcc AS CHAR(1)) IS NULL OR e.TIPO_TCC = :tipoTcc)
         AND (:ignorarFiltroTemas = TRUE OR et.TEMA_ID IN (:temasIds))
         AND (:ignorarFiltroCaracteristicas = TRUE OR ec.CARACTERISTICA_ID IN (:pontosFortesIds))
         AND (:ignorarTipoCaracteristica = TRUE OR ec.TIPO_CARACTERISTICA = :tipoCaracteristica)
@@ -88,8 +87,8 @@ public class Estudante {
   @Column(name = "TELEFONE", nullable = false, length = 20, columnDefinition = "VARCHAR(20)")
   private String telefone;
 
-  @Column(name = "FOTO", nullable = true, columnDefinition = "BLOB")
-  private Blob foto;
+  @Column(name = "FOTO", nullable = true, columnDefinition = "TEXT")
+  private String foto;
 
   @Column(name = "DATA_NASCIMENTO", nullable = false, columnDefinition = "DATE")
   private LocalDate dataNascimento;
@@ -137,22 +136,14 @@ public class Estudante {
   private CursoSuperior curso;
 
   @ManyToMany(fetch = FetchType.LAZY)
-  @JoinTable(
-    name = "ESTUDANTE_TEMA",
-    joinColumns = @JoinColumn(name = "ESTUDANTE_ID"), 
-    inverseJoinColumns = @JoinColumn(name = "TEMA_ID")
-  )
+  @JoinTable(name = "ESTUDANTE_TEMA", joinColumns = @JoinColumn(name = "ESTUDANTE_ID"), inverseJoinColumns = @JoinColumn(name = "TEMA_ID"))
   private Set<Tema> temas = new HashSet<>();
 
   @OneToMany(mappedBy = "estudante", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
   private Set<EstudanteCaracteristica> caracteristicas = new HashSet<>();;
 
   @ManyToMany(fetch = FetchType.LAZY)
-  @JoinTable(
-    name = "ESTUDANTE_DISPONIBILIDADE", 
-    joinColumns = @JoinColumn(name = "ESTUDANTE_ID"), 
-    inverseJoinColumns = @JoinColumn(name = "DISPONIBILIDADE_ID")
-  )
+  @JoinTable(name = "ESTUDANTE_DISPONIBILIDADE", joinColumns = @JoinColumn(name = "ESTUDANTE_ID"), inverseJoinColumns = @JoinColumn(name = "DISPONIBILIDADE_ID"))
   @OrderBy("diaSemana")
   private Set<Disponibilidade> disponibilidades = new HashSet<>();
 }

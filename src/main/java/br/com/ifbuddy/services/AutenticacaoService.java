@@ -10,7 +10,6 @@ import br.com.ifbuddy.rest.dto.CadastroDTO;
 import br.com.ifbuddy.rest.dto.LoginDTO;
 import br.com.ifbuddy.rest.dto.TokenDTO;
 import br.com.ifbuddy.rest.dto.UsuarioDTO;
-import br.com.ifbuddy.utils.BlobUtils;
 import br.com.ifbuddy.utils.JwtUtils;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
@@ -104,7 +103,7 @@ public class AutenticacaoService {
         estudante.getNome(),
         estudante.getEmail(),
         estudante.getMatricula(),
-        BlobUtils.blobParaString(estudante.getFoto()),
+        estudante.getFoto(),
         estudante.getAtivo());
   }
 
@@ -117,7 +116,7 @@ public class AutenticacaoService {
         estudante.getNome(),
         estudante.getEmail(),
         estudante.getMatricula(),
-        BlobUtils.blobParaString(estudante.getFoto()),
+        estudante.getFoto(),
         estudante.getAtivo());
   }
 }
