@@ -3,9 +3,11 @@ package br.com.ifbuddy.rest.dto;
 import java.util.List;
 
 import br.com.ifbuddy.enums.TipoTCC;
+import io.quarkus.runtime.annotations.RegisterForReflection;
 import lombok.Data;
 
 @Data
+@RegisterForReflection
 public class EstudanteDTO {
   private Long estudanteId;
   private String nome;
