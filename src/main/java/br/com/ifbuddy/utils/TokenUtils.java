@@ -9,7 +9,10 @@ import org.jose4j.jwt.NumericDate;
 import org.jose4j.jwt.consumer.JwtConsumer;
 import org.jose4j.jwt.consumer.JwtConsumerBuilder;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.security.KeyFactory;
 import java.security.PrivateKey;
 import java.security.PublicKey;
@@ -27,7 +30,7 @@ public class TokenUtils {
     }
 
     public static String generateTokenString(JwtClaims claims) throws Exception {
-        PrivateKey pk = readPrivateKey("/etc/secrets/privateKey.pem");
+        PrivateKey pk = readPrivateKey("privateKey.pem");
         return generateTokenString(pk, "/privateKey.pem", claims);
     }
 
@@ -52,7 +55,7 @@ public class TokenUtils {
     }
 
     public static JwtClaims validateToken(String token) throws Exception {
-        PublicKey publicKey = readPublicKey("/etc/secrets/publicKey.pem");
+        PublicKey publicKey = readPublicKey("publicKey.pem");
 
         JwtConsumer jwtConsumer = new JwtConsumerBuilder()
             .setRequireExpirationTime()
@@ -73,10 +76,15 @@ public class TokenUtils {
      * @throws Exception on decode failure
      */
     public static PrivateKey readPrivateKey(final String pemResName) throws Exception {
-        InputStream contentIS = TokenUtils.class.getResourceAsStream(pemResName);
-        byte[] tmp = new byte[4096];
-        int length = contentIS.read(tmp);
-        return decodePrivateKey(new String(tmp, 0, length, "UTF-8"));
+        try (InputStream contentIS = Files.newInputStream(Paths.get(pemResName));) {
+            byte[] tmp = new byte[4096];
+            int length = contentIS.read(tmp);
+            return decodePrivateKey(new String(tmp, 0, length, "UTF-8"));
+        } catch(IOException e) {
+            System.err.println("Erro ao ler o arquivo: " + pemResName);
+            e.printStackTrace();
+        }
+        return null;
     }
 
     /**
@@ -102,10 +110,15 @@ public class TokenUtils {
      * @throws Exception on decode failure
      */
     public static PublicKey readPublicKey(String pemResName) throws Exception {
-        InputStream is = TokenUtils.class.getResourceAsStream(pemResName);
-        byte[] tmp = new byte[4096];
-        int length = is.read(tmp);
-        return decodePublicKey(new String(tmp, 0, length, "UTF-8"));
+        try (InputStream contentIS = Files.newInputStream(Paths.get(pemResName));) {
+            byte[] tmp = new byte[4096];
+            int length = contentIS.read(tmp);
+            return decodePublicKey(new String(tmp, 0, length, "UTF-8"));
+        } catch(IOException e) {
+            System.err.println("Erro ao ler o arquivo: " + pemResName);
+            e.printStackTrace();
+        }
+        return null;
     }
 
     /**
