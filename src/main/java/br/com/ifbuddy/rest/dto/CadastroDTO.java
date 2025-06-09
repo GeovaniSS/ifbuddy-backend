@@ -1,13 +1,14 @@
 package br.com.ifbuddy.rest.dto;
 
 import lombok.Data;
-
+import io.quarkus.runtime.annotations.RegisterForReflection;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 @Data
+@RegisterForReflection
 public class CadastroDTO {
   @NotBlank(message = "Matrícula é obrigatória")
   private String matricula;

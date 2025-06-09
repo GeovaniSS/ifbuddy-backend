@@ -2,9 +2,11 @@ package br.com.ifbuddy.rest.dto;
 
 import java.util.List;
 
+import io.quarkus.runtime.annotations.RegisterForReflection;
 import lombok.Data;
 
 @Data
+@RegisterForReflection
 public class FiltrosDTO {
   private Long estudanteId;
   private Long cursoId;

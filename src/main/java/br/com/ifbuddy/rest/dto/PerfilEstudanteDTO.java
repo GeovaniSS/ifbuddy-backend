@@ -2,9 +2,12 @@ package br.com.ifbuddy.rest.dto;
 
 import java.time.LocalDate;
 import java.util.List;
+
+import io.quarkus.runtime.annotations.RegisterForReflection;
 import lombok.Data;
 
 @Data
+@RegisterForReflection
 public class PerfilEstudanteDTO {
   private Long estudanteId;
   private String telefone;
