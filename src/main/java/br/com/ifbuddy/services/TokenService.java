@@ -8,6 +8,7 @@ import org.jose4j.jwt.JwtClaims;
 import br.com.ifbuddy.enums.Roles;
 import br.com.ifbuddy.utils.TokenUtils;
 import jakarta.enterprise.context.RequestScoped;
+import jakarta.inject.Inject;
 
 import java.util.Arrays;
 import java.util.UUID;
@@ -16,6 +17,9 @@ import java.util.UUID;
 public class TokenService {
   @ConfigProperty(name = "mp.jwt.verify.issuer")
   private static String issuer;
+
+  @Inject
+  TokenUtils tokenUtils;
 
   public final static Logger LOGGER = Logger.getLogger(TokenService.class.getSimpleName());
 
@@ -35,7 +39,7 @@ public class TokenService {
       jwtClaims.setAudience("using-jwt");
       jwtClaims.setExpirationTimeMinutesInTheFuture(60);
 
-      String token = TokenUtils.generateTokenString(jwtClaims);
+      String token = tokenUtils.generateTokenString(jwtClaims);
       LOGGER.info("TOKEN generated: " + token);
       return token;
     } catch (Exception e) {
@@ -46,7 +50,7 @@ public class TokenService {
 
   public JwtClaims validateToken(String token) {
     try {
-      return TokenUtils.validateToken(token);
+      return tokenUtils.validateToken(token);
     } catch (Exception e) {
       e.printStackTrace();
       throw new RuntimeException(e);

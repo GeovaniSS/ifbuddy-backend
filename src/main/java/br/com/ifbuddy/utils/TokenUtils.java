@@ -9,40 +9,41 @@ import org.jose4j.jwt.NumericDate;
 import org.jose4j.jwt.consumer.JwtConsumer;
 import org.jose4j.jwt.consumer.JwtConsumerBuilder;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+
 import java.security.KeyFactory;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
-import java.util.Map;
 
+@ApplicationScoped
 public class TokenUtils {
 
+    @Inject
+    @ConfigProperty(name = "PRIVATE_KEY_STRING")
+    String privateKeyPem;
+
+    @Inject
+    @ConfigProperty(name = "PUBLIC_KEY_STRING")
+    String publicKeyPem;
+
+    @Inject
     @ConfigProperty(name = "mp.jwt.verify.issuer")
-    private static String issuer;
+    String issuer;
 
-    private TokenUtils() {
+    public String generateTokenString(JwtClaims claims) throws Exception {
+        PrivateKey pk = decodePrivateKey(privateKeyPem);
+        return generateTokenString(pk, "ifbuddy", claims);
     }
 
-    public static String generateTokenString(JwtClaims claims) throws Exception {
-        PrivateKey pk = readPrivateKey("privateKey.pem");
-        return generateTokenString(pk, "/privateKey.pem", claims);
-    }
-
-    private static String generateTokenString(PrivateKey privateKey, String kid, JwtClaims claims) throws Exception {
+    private String generateTokenString(PrivateKey privateKey, String kid, JwtClaims claims) throws Exception {
         long currentTimeInSecs = currentTimeInSecs();
 
         claims.setIssuedAt(NumericDate.fromSeconds(currentTimeInSecs));
         claims.setClaim(Claims.auth_time.name(), NumericDate.fromSeconds(currentTimeInSecs));
-
-        for (Map.Entry<String, Object> entry : claims.getClaimsMap().entrySet()) {
-            System.out.printf("\tAdded claim: %s, value: %s\n", entry.getKey(), entry.getValue());
-        }
 
         JsonWebSignature jws = new JsonWebSignature();
         jws.setPayload(claims.toJson());
@@ -54,13 +55,13 @@ public class TokenUtils {
         return jws.getCompactSerialization();
     }
 
-    public static JwtClaims validateToken(String token) throws Exception {
-        PublicKey publicKey = readPublicKey("publicKey.pem");
+    public JwtClaims validateToken(String token) throws Exception {
+        PublicKey publicKey = decodePublicKey(publicKeyPem);
 
         JwtConsumer jwtConsumer = new JwtConsumerBuilder()
             .setRequireExpirationTime()
             .setAllowedClockSkewInSeconds(30)
-            .setExpectedIssuer("IFBuddy")
+            .setExpectedIssuer(issuer)
             .setExpectedAudience("using-jwt")
             .setVerificationKey(publicKey)
             .build();
@@ -68,67 +69,14 @@ public class TokenUtils {
         return jwtConsumer.processToClaims(token);
     }
 
-    /**
-     * Read a PEM encoded private key from the classpath
-     *
-     * @param pemResName - key file resource name
-     * @return PrivateKey
-     * @throws Exception on decode failure
-     */
-    public static PrivateKey readPrivateKey(final String pemResName) throws Exception {
-        try (InputStream contentIS = Files.newInputStream(Paths.get(pemResName));) {
-            byte[] tmp = new byte[4096];
-            int length = contentIS.read(tmp);
-            return decodePrivateKey(new String(tmp, 0, length, "UTF-8"));
-        } catch(IOException e) {
-            System.err.println("Erro ao ler o arquivo: " + pemResName);
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    /**
-     * Decode a PEM encoded private key string to an RSA PrivateKey
-     *
-     * @param pemEncoded - PEM string for private key
-     * @return PrivateKey
-     * @throws Exception on decode failure
-     */
-    public static PrivateKey decodePrivateKey(final String pemEncoded) throws Exception {
+    private static PrivateKey decodePrivateKey(String pemEncoded) throws Exception {
         byte[] encodedBytes = toEncodedBytes(pemEncoded);
-
         PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(encodedBytes);
         KeyFactory kf = KeyFactory.getInstance("RSA");
         return kf.generatePrivate(keySpec);
     }
 
-    /**
-     * Read a PEM encoded public key from the classpath
-     *
-     * @param pemResName - key file resource name
-     * @return PublicKey
-     * @throws Exception on decode failure
-     */
-    public static PublicKey readPublicKey(String pemResName) throws Exception {
-        try (InputStream contentIS = Files.newInputStream(Paths.get(pemResName));) {
-            byte[] tmp = new byte[4096];
-            int length = contentIS.read(tmp);
-            return decodePublicKey(new String(tmp, 0, length, "UTF-8"));
-        } catch(IOException e) {
-            System.err.println("Erro ao ler o arquivo: " + pemResName);
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    /**
-     * Decode a PEM encoded public key string to an RSA PublicKey
-     *
-     * @param pemEncoded - PEM string for public key
-     * @return PublicKey
-     * @throws Exception on decode failure
-     */
-    public static PublicKey decodePublicKey(String pemEncoded) throws Exception {
+    private static PublicKey decodePublicKey(String pemEncoded) throws Exception {
         byte[] encodedBytes = toEncodedBytes(pemEncoded);
         X509EncodedKeySpec keySpec = new X509EncodedKeySpec(encodedBytes);
         KeyFactory kf = KeyFactory.getInstance("RSA");
@@ -137,22 +85,22 @@ public class TokenUtils {
 
     private static byte[] toEncodedBytes(final String pemEncoded) {
         final String normalizedPem = removeBeginEnd(pemEncoded);
+        System.out.println(normalizedPem);
         return Base64.getDecoder().decode(normalizedPem);
     }
 
     private static String removeBeginEnd(String pem) {
+        pem = pem.replace("\\n", "\n");
+
         pem = pem.replaceAll("-----BEGIN (.*)-----", "");
-        pem = pem.replaceAll("-----END (.*)----", "");
-        pem = pem.replaceAll("\r\n", "");
-        pem = pem.replaceAll("\n", "");
+        pem = pem.replaceAll("-----END (.*)-----", "");
+
+        pem = pem.replaceAll("\\s+", "");
+
         return pem.trim();
     }
 
-    /**
-     * @return the current time in seconds since epoch
-     */
     public static int currentTimeInSecs() {
-        long currentTimeMS = System.currentTimeMillis();
-        return (int) (currentTimeMS / 1000);
+        return (int) (System.currentTimeMillis() / 1000);
     }
 }
