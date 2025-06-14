@@ -4,6 +4,7 @@ import java.util.List;
 
 import br.com.ifbuddy.models.CaracteristicaPessoal;
 import br.com.ifbuddy.repository.CaracteristicaRepository;
+import io.quarkus.panache.common.Sort;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
 
@@ -13,6 +14,6 @@ public class CaracteristicaService {
   CaracteristicaRepository caracteristicaRepository;
 
   public List<CaracteristicaPessoal> listarCaracteristicas() {
-    return caracteristicaRepository.listAll();
+    return caracteristicaRepository.listAll(Sort.by("descricao"));
   }
 }

@@ -4,6 +4,7 @@ import java.util.List;
 
 import br.com.ifbuddy.models.Tema;
 import br.com.ifbuddy.repository.TemaRepository;
+import io.quarkus.panache.common.Sort;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
 
@@ -13,6 +14,6 @@ public class TemaService {
   TemaRepository temaRepository;
 
   public List<Tema> listarTemas() {
-    return temaRepository.listAll();
+    return temaRepository.listAll(Sort.by("nomeTema"));
   }
 }
